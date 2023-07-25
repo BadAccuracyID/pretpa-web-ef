@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/badaccuracyid/tpa-web-ef/database"
-	"github.com/badaccuracyid/tpa-web-ef/middleware"
+	graph2 "github.com/badaccuracyid/tpa-web-ef/internal/graph"
+	"github.com/badaccuracyid/tpa-web-ef/internal/middleware"
+	"github.com/badaccuracyid/tpa-web-ef/pkg/database"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/badaccuracyid/tpa-web-ef/graph"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -36,9 +36,9 @@ func main() {
 	if err != nil {
 		panic("failed to get database: " + err.Error())
 	}
-	graphConfig := graph.Config{Resolvers: &graph.Resolver{DB: getDatabase}}
+	graphConfig := graph2.Config{Resolvers: &graph2.Resolver{DB: getDatabase}}
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graphConfig))
+	srv := handler.NewDefaultServer(graph2.NewExecutableSchema(graphConfig))
 
 	router := mux.NewRouter()
 	router.Use(middleware.AuthMiddleware)
