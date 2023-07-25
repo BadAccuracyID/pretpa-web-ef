@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"github.com/badaccuracyid/tpa-web-ef/internal/graph/model"
 	"github.com/badaccuracyid/tpa-web-ef/internal/utils"
 	"github.com/google/uuid"
@@ -16,11 +17,12 @@ type UserService interface {
 }
 
 type userService struct {
-	db *gorm.DB
+	ctx context.Context
+	db  *gorm.DB
 }
 
-func NewUserService(db *gorm.DB) UserService {
-	return &userService{db: db}
+func NewUserService(ctx context.Context, db *gorm.DB) UserService {
+	return &userService{ctx: ctx, db: db}
 }
 
 func (s *userService) CreateUser(input *model.UserInput) (*model.User, error) {

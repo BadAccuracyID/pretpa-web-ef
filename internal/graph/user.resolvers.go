@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"github.com/badaccuracyid/tpa-web-ef/internal/service"
 
 	"github.com/badaccuracyid/tpa-web-ef/internal/graph/model"
@@ -14,30 +13,32 @@ import (
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.UserInput) (*model.User, error) {
-	userService := service.NewUserService(r.DB)
+	userService := service.NewUserService(ctx, r.DB)
 	return userService.CreateUser(&input)
 }
 
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input model.UserInput) (*model.User, error) {
-	userService := service.NewUserService(r.DB)
+	userService := service.NewUserService(ctx, r.DB)
 	return userService.UpdateUser(id, &input)
 }
 
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (*model.User, error) {
-	userService := service.NewUserService(r.DB)
+	userService := service.NewUserService(ctx, r.DB)
 	return userService.DeleteUser(id)
 }
 
 // GetAllUsers is the resolver for the getAllUsers field.
 func (r *queryResolver) GetAllUsers(ctx context.Context) ([]*model.User, error) {
-	panic(fmt.Errorf("not implemented: GetAllUsers - getAllUsers"))
+	userService := service.NewUserService(ctx, r.DB)
+	return userService.GetAllUsers()
 }
 
 // GetUser is the resolver for the getUser field.
 func (r *queryResolver) GetUser(ctx context.Context, id string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: GetUser - getUser"))
+	userService := service.NewUserService(ctx, r.DB)
+	return userService.GetUser(id)
 }
 
 // Mutation returns MutationResolver implementation.
