@@ -1,0 +1,6 @@
+/.idea
+/.test
+.out
+.env
+.DS_Store
+MACOSX
