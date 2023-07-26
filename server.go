@@ -1,7 +1,8 @@
 package main
 
 import (
-	graph2 "github.com/badaccuracyid/tpa-web-ef/internal/graph"
+	"github.com/badaccuracyid/tpa-web-ef/internal/graph"
+	"github.com/badaccuracyid/tpa-web-ef/internal/graph/resolver"
 	"github.com/badaccuracyid/tpa-web-ef/internal/middleware"
 	"github.com/badaccuracyid/tpa-web-ef/internal/service"
 	"github.com/badaccuracyid/tpa-web-ef/pkg/database"
@@ -37,9 +38,9 @@ func main() {
 	if err != nil {
 		panic("failed to get database: " + err.Error())
 	}
-	graphConfig := graph2.Config{Resolvers: &graph2.Resolver{DB: getDatabase}}
+	graphConfig := graph.Config{Resolvers: &resolver.Resolver{DB: getDatabase}}
 
-	srv := handler.NewDefaultServer(graph2.NewExecutableSchema(graphConfig))
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graphConfig))
 
 	jwtSecret := os.Getenv("JWT_SECRET")
 	jwtService := service.NewJWTService(jwtSecret)
