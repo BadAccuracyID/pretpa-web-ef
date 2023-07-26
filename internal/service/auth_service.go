@@ -57,13 +57,12 @@ func (a *authService) Register(input *model.RegisterInput) (*model.User, error) 
 }
 
 func (a *authService) ChangePassword(oldPassword string, newPassword string) (*model.User, error) {
-	userService := NewUserService(a.ctx, a.db)
-
 	userId, err := utils.GetCurrentUserID(a.ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	userService := NewUserService(a.ctx, a.db)
 	user, err := userService.GetUser(userId)
 	if err != nil {
 		return nil, err
