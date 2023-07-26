@@ -7,5 +7,5 @@ type User struct {
 	Username       string `json:"username" gorm:"unique"`
 	HashedPassword string `json:"hashedPassword"`
 
-	JWTToken string `json:"jwtToken"`
+	JWTToken string `json:"jwtToken" gorm:"-"`
 }
