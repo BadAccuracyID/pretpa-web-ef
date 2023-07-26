@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"github.com/badaccuracyid/tpa-web-ef/internal/graph/model"
 	"github.com/badaccuracyid/tpa-web-ef/internal/utils"
 	"gorm.io/gorm"
@@ -48,9 +49,9 @@ func (s *userService) UpdateUser(id string, input *model.UserInput) (*model.User
 }
 
 func (s *userService) UpdateCurrentUser(input *model.UserInput) (*model.User, error) {
-	userId, err := utils.GetCurrentUserID(s.ctx)
-	if err != nil {
-		return nil, err
+	userId := utils.GetCurrentUserID(s.ctx)
+	if userId == "" {
+		return nil, errors.New("user not found")
 	}
 
 	return s.updateUserByID(userId, input)
@@ -73,18 +74,18 @@ func (s *userService) DeleteUser(id string) (*model.User, error) {
 }
 
 func (s *userService) DeleteCurrentUser() (*model.User, error) {
-	userId, err := utils.GetCurrentUserID(s.ctx)
-	if err != nil {
-		return nil, err
+	userId := utils.GetCurrentUserID(s.ctx)
+	if userId == "" {
+		return nil, errors.New("user not found")
 	}
 
 	return s.DeleteUser(userId)
 }
 
 func (s *userService) GetCurrentUser() (*model.User, error) {
-	userId, err := utils.GetCurrentUserID(s.ctx)
-	if err != nil {
-		return nil, err
+	userId := utils.GetCurrentUserID(s.ctx)
+	if userId == "" {
+		return nil, errors.New("user not found")
 	}
 
 	return s.GetUser(userId)

@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
+	"errors"
 	"github.com/badaccuracyid/tpa-web-ef/internal/graph/model"
 	"github.com/badaccuracyid/tpa-web-ef/internal/utils"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"os"
 )
 
 type AuthService interface {
@@ -33,6 +35,13 @@ func (a *authService) Login(input *model.LoginInput) (*model.User, error) {
 		return nil, err
 	}
 
+	jwtSecret := os.Getenv("JWT_SECRET")
+	jwtToken, err := NewJWTService(jwtSecret).GenerateToken(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	user.JWTToken = jwtToken
 	return user, nil
 }
 
@@ -53,13 +62,21 @@ func (a *authService) Register(input *model.RegisterInput) (*model.User, error) 
 	if err := a.db.Create(user).Error; err != nil {
 		return nil, err
 	}
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	jwtToken, err := NewJWTService(jwtSecret).GenerateToken(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	user.JWTToken = jwtToken
 	return user, nil
 }
 
 func (a *authService) ChangePassword(oldPassword string, newPassword string) (*model.User, error) {
-	userId, err := utils.GetCurrentUserID(a.ctx)
-	if err != nil {
-		return nil, err
+	userId := utils.GetCurrentUserID(a.ctx)
+	if userId == "" {
+		return nil, errors.New("user not found")
 	}
 
 	userService := NewUserService(a.ctx, a.db)

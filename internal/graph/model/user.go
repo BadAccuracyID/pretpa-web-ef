@@ -6,4 +6,6 @@ type User struct {
 	Email          string `json:"email" gorm:"unique"`
 	Username       string `json:"username" gorm:"unique"`
 	HashedPassword string `json:"hashedPassword"`
+
+	JWTToken string `json:"jwtToken"`
 }
