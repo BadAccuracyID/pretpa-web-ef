@@ -3,6 +3,7 @@ package main
 import (
 	graph2 "github.com/badaccuracyid/tpa-web-ef/internal/graph"
 	"github.com/badaccuracyid/tpa-web-ef/internal/middleware"
+	"github.com/badaccuracyid/tpa-web-ef/internal/service"
 	"github.com/badaccuracyid/tpa-web-ef/pkg/database"
 	"log"
 	"net/http"
@@ -40,8 +41,12 @@ func main() {
 
 	srv := handler.NewDefaultServer(graph2.NewExecutableSchema(graphConfig))
 
+	jwtSecret := os.Getenv("JWT_SECRET")
+	jwtService := service.NewJWTService(jwtSecret)
+	authMiddleware := middleware.NewAuthMiddleware(jwtService)
+
 	router := mux.NewRouter()
-	router.Use(middleware.AuthMiddleware)
+	router.Use(authMiddleware.Middleware)
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)

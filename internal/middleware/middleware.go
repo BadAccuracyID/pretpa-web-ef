@@ -2,16 +2,42 @@ package middleware
 
 import (
 	"context"
+	"github.com/badaccuracyid/tpa-web-ef/internal/service"
 	"net/http"
 )
 
-func AuthMiddleware(next http.Handler) http.Handler {
+const (
+	AuthorizationHeader = "Authorization"
+	UserIDKey           = "UserID"
+)
+
+type AuthMiddleware struct {
+	jwtService service.JWTService
+}
+
+func NewAuthMiddleware(service service.JWTService) *AuthMiddleware {
+	return &AuthMiddleware{
+		jwtService: service,
+	}
+}
+
+func (a *AuthMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		token := request.Header.Get("Authorization")
-		if token != "" {
-			ctx := context.WithValue(request.Context(), "token", token)
-			request = request.WithContext(ctx)
+		token := request.Header.Get(AuthorizationHeader)
+
+		if token == "" {
+			writer.WriteHeader(http.StatusUnauthorized)
+			return
 		}
+
+		userId, err := a.jwtService.ValidateToken(token)
+		if err != nil {
+			writer.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		ctx := context.WithValue(request.Context(), UserIDKey, userId)
+		request = request.WithContext(ctx)
 
 		next.ServeHTTP(writer, request)
 	})
