@@ -1,4 +1,4 @@
-package graph
+package resolver
 
 // This file will be automatically regenerated based on the schema, any resolver implementations
 // will be copied through when generating and any unknown code will be moved to the end.
@@ -6,9 +6,10 @@ package graph
 
 import (
 	"context"
-	"github.com/badaccuracyid/tpa-web-ef/internal/service"
 
+	"github.com/badaccuracyid/tpa-web-ef/internal/graph"
 	"github.com/badaccuracyid/tpa-web-ef/internal/graph/model"
+	"github.com/badaccuracyid/tpa-web-ef/internal/service"
 )
 
 // CreateUser is the resolver for the createUser field.
@@ -41,11 +42,11 @@ func (r *queryResolver) GetUser(ctx context.Context, id string) (*model.User, er
 	return userService.GetUser(id)
 }
 
-// Mutation returns MutationResolver implementation.
-func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
+// Mutation returns graph.MutationResolver implementation.
+func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
 
-// Query returns QueryResolver implementation.
-func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
+// Query returns graph.QueryResolver implementation.
+func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
