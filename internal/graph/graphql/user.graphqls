@@ -3,6 +3,7 @@ type User {
     name: String!
     email: String!
     username: String!
+    jwtToken: String
 }
 
 input UserInput {

@@ -64,6 +64,7 @@ type ComplexityRoot struct {
 	User struct {
 		Email    func(childComplexity int) int
 		ID       func(childComplexity int) int
+		JWTToken func(childComplexity int) int
 		Name     func(childComplexity int) int
 		Username func(childComplexity int) int
 	}
@@ -217,6 +218,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.ID(childComplexity), true
+
+	case "User.jwtToken":
+		if e.complexity.User.JWTToken == nil {
+			break
+		}
+
+		return e.complexity.User.JWTToken(childComplexity), true
 
 	case "User.name":
 		if e.complexity.User.Name == nil {
@@ -583,6 +591,8 @@ func (ec *executionContext) fieldContext_Mutation_updateCurrentUser(ctx context.
 				return ec.fieldContext_User_email(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
+			case "jwtToken":
+				return ec.fieldContext_User_jwtToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -648,6 +658,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 				return ec.fieldContext_User_email(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
+			case "jwtToken":
+				return ec.fieldContext_User_jwtToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -713,6 +725,8 @@ func (ec *executionContext) fieldContext_Mutation_deleteCurrentUser(ctx context.
 				return ec.fieldContext_User_email(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
+			case "jwtToken":
+				return ec.fieldContext_User_jwtToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -767,6 +781,8 @@ func (ec *executionContext) fieldContext_Mutation_deleteUser(ctx context.Context
 				return ec.fieldContext_User_email(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
+			case "jwtToken":
+				return ec.fieldContext_User_jwtToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -829,6 +845,8 @@ func (ec *executionContext) fieldContext_Mutation_register(ctx context.Context, 
 				return ec.fieldContext_User_email(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
+			case "jwtToken":
+				return ec.fieldContext_User_jwtToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -891,6 +909,8 @@ func (ec *executionContext) fieldContext_Mutation_changePassword(ctx context.Con
 				return ec.fieldContext_User_email(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
+			case "jwtToken":
+				return ec.fieldContext_User_jwtToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -956,6 +976,8 @@ func (ec *executionContext) fieldContext_Query_getCurrentUser(ctx context.Contex
 				return ec.fieldContext_User_email(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
+			case "jwtToken":
+				return ec.fieldContext_User_jwtToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1010,6 +1032,8 @@ func (ec *executionContext) fieldContext_Query_getUser(ctx context.Context, fiel
 				return ec.fieldContext_User_email(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
+			case "jwtToken":
+				return ec.fieldContext_User_jwtToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1075,6 +1099,8 @@ func (ec *executionContext) fieldContext_Query_getAllUsers(ctx context.Context, 
 				return ec.fieldContext_User_email(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
+			case "jwtToken":
+				return ec.fieldContext_User_jwtToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1126,6 +1152,8 @@ func (ec *executionContext) fieldContext_Query_login(ctx context.Context, field 
 				return ec.fieldContext_User_email(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
+			case "jwtToken":
+				return ec.fieldContext_User_jwtToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1437,6 +1465,47 @@ func (ec *executionContext) _User_username(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext_User_username(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_jwtToken(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_jwtToken(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JWTToken, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_jwtToken(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -3615,6 +3684,8 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "jwtToken":
+			out.Values[i] = ec._User_jwtToken(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4358,6 +4429,16 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	res := graphql.MarshalBoolean(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
 	return res
 }
 
