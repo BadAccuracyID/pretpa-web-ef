@@ -6,16 +6,15 @@ package resolver
 
 import (
 	"context"
-
 	"github.com/badaccuracyid/tpa-web-ef/internal/graph"
 	"github.com/badaccuracyid/tpa-web-ef/internal/graph/model"
 	"github.com/badaccuracyid/tpa-web-ef/internal/service"
 )
 
-// CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, input model.UserInput) (*model.User, error) {
+// UpdateCurrentUser is the resolver for the updateCurrentUser field.
+func (r *mutationResolver) UpdateCurrentUser(ctx context.Context, input model.UserInput) (*model.User, error) {
 	userService := service.NewUserService(ctx, r.DB)
-	return userService.CreateUser(&input)
+	return userService.UpdateCurrentUser(&input)
 }
 
 // UpdateUser is the resolver for the updateUser field.
@@ -24,22 +23,34 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 	return userService.UpdateUser(id, &input)
 }
 
+// DeleteCurrentUser is the resolver for the deleteCurrentUser field.
+func (r *mutationResolver) DeleteCurrentUser(ctx context.Context) (*model.User, error) {
+	userService := service.NewUserService(ctx, r.DB)
+	return userService.DeleteCurrentUser()
+}
+
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (*model.User, error) {
 	userService := service.NewUserService(ctx, r.DB)
 	return userService.DeleteUser(id)
 }
 
-// GetAllUsers is the resolver for the getAllUsers field.
-func (r *queryResolver) GetAllUsers(ctx context.Context) ([]*model.User, error) {
+// GetCurrentUser is the resolver for the getCurrentUser field.
+func (r *queryResolver) GetCurrentUser(ctx context.Context) (*model.User, error) {
 	userService := service.NewUserService(ctx, r.DB)
-	return userService.GetAllUsers()
+	return userService.GetCurrentUser()
 }
 
 // GetUser is the resolver for the getUser field.
 func (r *queryResolver) GetUser(ctx context.Context, id string) (*model.User, error) {
 	userService := service.NewUserService(ctx, r.DB)
 	return userService.GetUser(id)
+}
+
+// GetAllUsers is the resolver for the getAllUsers field.
+func (r *queryResolver) GetAllUsers(ctx context.Context) ([]*model.User, error) {
+	userService := service.NewUserService(ctx, r.DB)
+	return userService.GetAllUsers()
 }
 
 // Mutation returns graph.MutationResolver implementation.

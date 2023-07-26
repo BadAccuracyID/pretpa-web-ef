@@ -4,16 +4,17 @@ import (
 	"context"
 	"github.com/badaccuracyid/tpa-web-ef/internal/graph/model"
 	"github.com/badaccuracyid/tpa-web-ef/internal/utils"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type UserService interface {
-	CreateUser(user *model.UserInput) (*model.User, error)
 	UpdateUser(id string, user *model.UserInput) (*model.User, error)
+	UpdateCurrentUser(user *model.UserInput) (*model.User, error)
 	DeleteUser(id string) (*model.User, error)
-	GetAllUsers() ([]*model.User, error)
+	DeleteCurrentUser() (*model.User, error)
+	GetCurrentUser() (*model.User, error)
 	GetUser(id string) (*model.User, error)
+	GetAllUsers() ([]*model.User, error)
 }
 
 type userService struct {
@@ -25,39 +26,16 @@ func NewUserService(ctx context.Context, db *gorm.DB) UserService {
 	return &userService{ctx: ctx, db: db}
 }
 
-func (s *userService) CreateUser(input *model.UserInput) (*model.User, error) {
-	hashedPassword, err := utils.HashPassword(input.Password)
+// Common update logic for both UpdateUser and UpdateCurrentUser
+func (s *userService) updateUserByID(id string, input *model.UserInput) (*model.User, error) {
+	user, err := s.GetUser(id)
 	if err != nil {
 		return nil, err
 	}
 
-	user := &model.User{
-		ID:             uuid.New().String(),
-		Name:           input.Name,
-		Email:          input.Email,
-		Username:       input.Username,
-		HashedPassword: hashedPassword,
-	}
-
-	if err := s.db.Create(user).Error; err != nil {
-		return nil, err
-	}
-	return user, nil
-}
-
-func (s *userService) UpdateUser(id string, input *model.UserInput) (*model.User, error) {
-	hashedPassword, err := utils.HashPassword(input.Password)
-	if err != nil {
-		return nil, err
-	}
-
-	user := &model.User{
-		ID:             id,
-		Name:           input.Name,
-		Email:          input.Email,
-		Username:       input.Username,
-		HashedPassword: hashedPassword,
-	}
+	user.Name = input.Name
+	user.Email = input.Email
+	user.Username = input.Username
 
 	if err := s.db.Model(user).Where("id = ?", id).Updates(user).Error; err != nil {
 		return nil, err
@@ -65,12 +43,56 @@ func (s *userService) UpdateUser(id string, input *model.UserInput) (*model.User
 	return user, nil
 }
 
-func (s *userService) DeleteUser(id string) (*model.User, error) {
-	user := &model.User{
-		ID: id,
+func (s *userService) UpdateUser(id string, input *model.UserInput) (*model.User, error) {
+	return s.updateUserByID(id, input)
+}
+
+func (s *userService) UpdateCurrentUser(input *model.UserInput) (*model.User, error) {
+	userId, err := utils.GetCurrentUserID(s.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.updateUserByID(userId, input)
+}
+
+func (s *userService) deleteUserByID(id string) (*model.User, error) {
+	user, err := s.GetUser(id)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := s.db.Where("id = ?", id).Delete(user).Error; err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (s *userService) DeleteUser(id string) (*model.User, error) {
+	return s.deleteUserByID(id)
+}
+
+func (s *userService) DeleteCurrentUser() (*model.User, error) {
+	userId, err := utils.GetCurrentUserID(s.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.DeleteUser(userId)
+}
+
+func (s *userService) GetCurrentUser() (*model.User, error) {
+	userId, err := utils.GetCurrentUserID(s.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.GetUser(userId)
+}
+
+func (s *userService) GetUser(id string) (*model.User, error) {
+	var user *model.User
+	if err := s.db.Where("id = ?", id).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return user, nil
@@ -82,12 +104,4 @@ func (s *userService) GetAllUsers() ([]*model.User, error) {
 		return nil, err
 	}
 	return users, nil
-}
-
-func (s *userService) GetUser(id string) (*model.User, error) {
-	var user *model.User
-	if err := s.db.Where("id = ?", id).First(&user).Error; err != nil {
-		return nil, err
-	}
-	return user, nil
 }

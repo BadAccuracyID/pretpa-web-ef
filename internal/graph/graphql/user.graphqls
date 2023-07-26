@@ -9,16 +9,17 @@ input UserInput {
     name: String!
     email: String!
     username: String!
-    password: String!
 }
 
 type Query {
-    getAllUsers: [User!]!
+    getCurrentUser: User!
     getUser(id: ID!): User!
+    getAllUsers: [User!]!
 }
 
 type Mutation {
-    createUser(input: UserInput!): User!
+    updateCurrentUser(input: UserInput!): User!
     updateUser(id: ID!, input: UserInput!): User!
+    deleteCurrentUser: User!
     deleteUser(id: ID!): User!
 }

@@ -2,9 +2,20 @@
 
 package model
 
+type LoginInput struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type RegisterInput struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+}
+
 type UserInput struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Username string `json:"username"`
-	Password string `json:"password"`
 }

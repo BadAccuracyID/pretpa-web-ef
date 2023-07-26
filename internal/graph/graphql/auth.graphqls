@@ -1,0 +1,20 @@
+input LoginInput {
+    username: String!
+    password: String!
+}
+
+input RegisterInput {
+    username: String!
+    password: String!
+    name: String!
+    email: String!
+}
+
+extend type Query {
+    login(input: LoginInput!): User
+}
+
+extend type Mutation {
+    register(input: RegisterInput!): User
+    changePassword(oldPassword: String!, newPassword: String!): User
+}
