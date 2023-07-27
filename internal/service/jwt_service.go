@@ -29,7 +29,10 @@ func NewJWTService(secretKey string) JWTService {
 func (s *jwtService) GenerateToken(userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, CustomClaim{
 		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    "EF23-1",
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 		UserID: userID,
 	})
@@ -38,7 +41,7 @@ func (s *jwtService) GenerateToken(userID string) (string, error) {
 }
 
 func (s *jwtService) ValidateToken(tokenString string) (string, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &CustomClaim{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
@@ -50,24 +53,15 @@ func (s *jwtService) ValidateToken(tokenString string) (string, error) {
 		return "", err
 	}
 
-	claims, ok := token.Claims.(CustomClaim)
+	claims, ok := token.Claims.(*CustomClaim)
 	if !ok || !token.Valid {
-		return "", errors.New("invalid token")
+		return "", err
 	}
 
-	expiry, err := claims.GetExpirationTime()
-	if err != nil {
-		return "", errors.New("invalid token")
+	userId := claims.UserID
+	if userId == "" {
+		return "", errors.New("user id is empty")
 	}
 
-	if time.Now().After(expiry.Time) {
-		return "", errors.New("token is expired")
-	}
-
-	userID := claims.UserID
-	if userID == "" {
-		return "", errors.New("invalid token")
-	}
-
-	return userID, nil
+	return userId, nil
 }

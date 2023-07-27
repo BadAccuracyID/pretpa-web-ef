@@ -26,13 +26,13 @@ func (a *AuthMiddleware) Middleware(next http.Handler) http.Handler {
 		token := request.Header.Get(AuthorizationHeader)
 
 		if token == "" {
-			writer.WriteHeader(http.StatusUnauthorized)
+			next.ServeHTTP(writer, request)
 			return
 		}
 
 		userId, err := a.jwtService.ValidateToken(token)
 		if err != nil {
-			writer.WriteHeader(http.StatusUnauthorized)
+			next.ServeHTTP(writer, request)
 			return
 		}
 
