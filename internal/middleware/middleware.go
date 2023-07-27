@@ -3,12 +3,8 @@ package middleware
 import (
 	"context"
 	"github.com/badaccuracyid/tpa-web-ef/internal/service"
+	"github.com/badaccuracyid/tpa-web-ef/internal/utils"
 	"net/http"
-)
-
-const (
-	AuthorizationHeader = "Authorization"
-	UserIDKey           = "UserID"
 )
 
 type AuthMiddleware struct {
@@ -23,7 +19,7 @@ func NewAuthMiddleware(service service.JWTService) *AuthMiddleware {
 
 func (a *AuthMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		token := request.Header.Get(AuthorizationHeader)
+		token := request.Header.Get(utils.AuthorizationHeader)
 
 		if token == "" {
 			next.ServeHTTP(writer, request)
@@ -36,7 +32,7 @@ func (a *AuthMiddleware) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(request.Context(), UserIDKey, userId)
+		ctx := context.WithValue(request.Context(), utils.UserIDKey, userId)
 		request = request.WithContext(ctx)
 
 		next.ServeHTTP(writer, request)

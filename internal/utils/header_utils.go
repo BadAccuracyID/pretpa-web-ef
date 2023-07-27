@@ -4,10 +4,6 @@ import (
 	"context"
 )
 
-const (
-	UserIDKey = "UserID"
-)
-
 func GetCurrentUserID(ctx context.Context) string {
 	if ctx == nil {
 		return ""

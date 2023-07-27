@@ -59,9 +59,9 @@ func (a *authService) Register(input *model.RegisterInput) (*model.User, error) 
 		HashedPassword: hashedPassword,
 	}
 
-	if err := a.db.Create(user).Error; err != nil {
-		return nil, err
-	}
+	//if err := a.db.Create(user).Error; err != nil {
+	//	return nil, err
+	//}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
 	jwtToken, err := NewJWTService(jwtSecret).GenerateToken(user.ID)
@@ -76,7 +76,7 @@ func (a *authService) Register(input *model.RegisterInput) (*model.User, error) 
 func (a *authService) ChangePassword(oldPassword string, newPassword string) (*model.User, error) {
 	userId := utils.GetCurrentUserID(a.ctx)
 	if userId == "" {
-		return nil, errors.New("user not found")
+		return nil, errors.New("userid key not found")
 	}
 
 	userService := NewUserService(a.ctx, a.db)
