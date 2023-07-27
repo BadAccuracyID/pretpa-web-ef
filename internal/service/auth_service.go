@@ -27,7 +27,7 @@ func NewAuthService(ctx context.Context, db *gorm.DB) AuthService {
 
 func (a *authService) Login(input *model.LoginInput) (*model.User, error) {
 	var user *model.User
-	if err := a.db.Where("email = ?", input.Username).First(&user).Error; err != nil {
+	if err := a.db.Where("username = ?", input.Username).First(&user).Error; err != nil {
 		return nil, err
 	}
 
