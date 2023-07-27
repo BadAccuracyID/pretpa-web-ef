@@ -6,14 +6,15 @@ import (
 	"github.com/badaccuracyid/tpa-web-ef/internal/middleware"
 	"github.com/badaccuracyid/tpa-web-ef/internal/service"
 	"github.com/badaccuracyid/tpa-web-ef/pkg/database"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 )
 
 const defaultPort = "8080"
@@ -52,6 +53,7 @@ func main() {
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)
 
+	handle := cors.AllowAll().Handler(router)
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	log.Fatal(http.ListenAndServe(":"+port, handle))
 }
