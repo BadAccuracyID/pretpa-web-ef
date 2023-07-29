@@ -2,6 +2,10 @@
 
 package model
 
+type CreateConversationInput struct {
+	UserIds []string `json:"userIds"`
+}
+
 type LoginInput struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -14,11 +18,19 @@ type RegisterInput struct {
 	Email    string `json:"email"`
 }
 
-// `Time` is a simple type only containing the current time as
-// a unix epoch timestamp and a string timestamp.
-type Time struct {
-	UnixTime  int    `json:"unixTime"`
-	TimeStamp string `json:"timeStamp"`
+type SendMessageInput struct {
+	UserID         string `json:"userId"`
+	ConversationID string `json:"conversationId"`
+	Content        string `json:"content"`
+}
+
+type SubscribeToConversationInput struct {
+	UserID         string `json:"userId"`
+	ConversationID string `json:"conversationId"`
+}
+
+type UnsubscribeFromConversationInput struct {
+	SubscriptionID string `json:"subscriptionId"`
 }
 
 type UserInput struct {

@@ -52,12 +52,12 @@ func (a *authService) Register(input *model.RegisterInput) (*model.User, error) 
 	}
 
 	user := &model.User{
-		ID:             uuid.New().String(),
 		Name:           input.Username,
 		Email:          input.Email,
 		Username:       input.Username,
 		HashedPassword: hashedPassword,
 	}
+	user.ID = uuid.New().String()
 
 	//if err := a.db.Create(user).Error; err != nil {
 	//	return nil, err

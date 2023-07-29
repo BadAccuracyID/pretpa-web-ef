@@ -1,0 +1,55 @@
+type Conversation {
+    id: ID!
+    users: [User]!
+    messages: [Message]!
+}
+
+type Message {
+    id: ID!
+    user: User!
+    conversation: Conversation!
+    content: String!
+    createdAt: String!
+}
+
+type ConversationSubscription {
+    id: ID!
+    user: User!
+    conversation: Conversation!
+}
+
+input SendMessageInput {
+    userId: ID!
+    conversationId: ID!
+    content: String!
+}
+
+input CreateConversationInput {
+    userIds: [ID!]!
+}
+
+input SubscribeToConversationInput {
+    userId: ID!
+    conversationId: ID!
+}
+
+input UnsubscribeFromConversationInput {
+    subscriptionId: ID!
+}
+
+extend type Query {
+    user(id: ID!): User
+    conversation(id: ID!): Conversation
+    message(id: ID!): Message
+}
+
+extend type Mutation {
+    sendMessage(input: SendMessageInput!): Message
+    createConversation(input: CreateConversationInput!): Conversation
+    subscribeToConversation(input: SubscribeToConversationInput!): ConversationSubscription
+    unsubscribeFromConversation(input: UnsubscribeFromConversationInput!): ConversationSubscription
+}
+
+type Subscription {
+    newMessage(conversationId: ID!): Message
+}

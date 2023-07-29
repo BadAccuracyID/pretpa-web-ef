@@ -31,6 +31,9 @@ func MigrateTables() (bool, error) {
 	}
 
 	err = db.AutoMigrate(&model.User{})
+	err = db.AutoMigrate(&model.Conversation{})
+	err = db.AutoMigrate(&model.Message{})
+	err = db.AutoMigrate(&model.ConversationSubscription{})
 	if err != nil {
 		return false, fmt.Errorf("failed to migrate tables: %w", err)
 	}

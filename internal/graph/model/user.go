@@ -1,7 +1,10 @@
 package model
 
+import "github.com/badaccuracyid/tpa-web-ef/internal/utils"
+
 type User struct {
-	ID             string `json:"id" gorm:"primaryKey"`
+	ID string `json:"user_id" gorm:"primaryKey"`
+	utils.DefaultCreateUpdate
 	Name           string `json:"name"`
 	Email          string `json:"email" gorm:"uniqueIndex;not null"`
 	Username       string `json:"username" gorm:"uniqueIndex;not null"`

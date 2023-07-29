@@ -36,11 +36,11 @@ func main() {
 		port = defaultPort
 	}
 
-	getDatabase, err := database.GetDatabase()
+	db, err := database.GetDatabase()
 	if err != nil {
 		panic("failed to get database: " + err.Error())
 	}
-	graphConfig := graph.Config{Resolvers: &resolver.Resolver{DB: getDatabase}}
+	graphConfig := graph.Config{Resolvers: &resolver.Resolver{DB: db}}
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graphConfig))
 	srv.AddTransport(transport.Websocket{})
