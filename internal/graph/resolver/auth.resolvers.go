@@ -6,6 +6,7 @@ package resolver
 
 import (
 	"context"
+
 	"github.com/badaccuracyid/tpa-web-ef/internal/graph/model"
 	"github.com/badaccuracyid/tpa-web-ef/internal/service"
 )

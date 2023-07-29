@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/badaccuracyid/tpa-web-ef/internal/graph"
 	"github.com/badaccuracyid/tpa-web-ef/internal/graph/resolver"
 	"github.com/badaccuracyid/tpa-web-ef/internal/middleware"
@@ -42,6 +43,7 @@ func main() {
 	graphConfig := graph.Config{Resolvers: &resolver.Resolver{DB: getDatabase}}
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graphConfig))
+	srv.AddTransport(transport.Websocket{})
 
 	jwtSecret := os.Getenv("JWT_SECRET")
 	jwtService := service.NewJWTService(jwtSecret)
