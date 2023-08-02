@@ -4,8 +4,8 @@ import (
 	"time"
 )
 
-type DefaultIncrementModel struct {
-	ID uint `json:"id" gorm:"primaryKey;autoIncrement"`
+type DefaultModel struct {
+	ID string `json:"id" gorm:"primaryKey"`
 	DefaultCreateUpdate
 }
 

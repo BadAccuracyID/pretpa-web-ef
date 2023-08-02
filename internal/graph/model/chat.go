@@ -1,28 +1,24 @@
 package model
 
 import (
-	"github.com/badaccuracyid/tpa-web-ef/internal/utils"
+	"time"
 )
 
 type Conversation struct {
-	utils.DefaultIncrementModel
-	Users    []User `gorm:"many2many:user_conversations;"`
-	Messages []Message
+	ID        string    `json:"id" gorm:"primaryKey"`
+	Users     []User    `gorm:"many2many:user_conversations;"`
+	Messages  []Message `gorm:"foreignKey:ConversationID"`
+	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime:milli"`
+	UpdatedAt time.Time `json:"updatedAt" gorm:"autoUpdateTime:milli"`
 }
 
 type Message struct {
-	utils.DefaultIncrementModel
+	ID             string       `json:"id" gorm:"primaryKey"`
 	UserID         string       `json:"user_id"`
 	User           User         `gorm:"not null;foreignKey:UserID"`
-	ConversationID uint         `json:"conversation_id"`
+	ConversationID string       `json:"conversation_id"`
 	Conversation   Conversation `gorm:"foreignKey:ConversationID"`
 	Content        string       `json:"content"`
-}
-
-type ConversationSubscription struct {
-	utils.DefaultIncrementModel
-	UserID         string       `json:"user_id"`
-	User           User         `gorm:"foreignKey:UserID"`
-	ConversationID uint         `json:"conversation_id"`
-	Conversation   Conversation `gorm:"foreignKey:ConversationID"`
+	CreatedAt      time.Time    `json:"createdAt" gorm:"autoCreateTime:milli"`
+	UpdatedAt      time.Time    `json:"updatedAt" gorm:"autoUpdateTime:milli"`
 }

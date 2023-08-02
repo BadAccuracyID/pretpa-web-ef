@@ -6,30 +6,10 @@ package resolver
 
 import (
 	"context"
-	"fmt"
-	"strconv"
-
 	"github.com/badaccuracyid/tpa-web-ef/internal/graph"
 	"github.com/badaccuracyid/tpa-web-ef/internal/graph/model"
+	"github.com/badaccuracyid/tpa-web-ef/internal/service"
 )
-
-// ID is the resolver for the id field.
-func (r *conversationResolver) ID(ctx context.Context, obj *model.Conversation) (string, error) {
-	objectID := obj.ID
-	return strconv.Itoa(int(objectID)), nil
-}
-
-// ID is the resolver for the id field.
-func (r *conversationSubscriptionResolver) ID(ctx context.Context, obj *model.ConversationSubscription) (string, error) {
-	objectID := obj.ID
-	return strconv.Itoa(int(objectID)), nil
-}
-
-// ID is the resolver for the id field.
-func (r *messageResolver) ID(ctx context.Context, obj *model.Message) (string, error) {
-	objectID := obj.ID
-	return strconv.Itoa(int(objectID)), nil
-}
 
 // CreatedAt is the resolver for the createdAt field.
 func (r *messageResolver) CreatedAt(ctx context.Context, obj *model.Message) (string, error) {
@@ -39,50 +19,48 @@ func (r *messageResolver) CreatedAt(ctx context.Context, obj *model.Message) (st
 
 // SendMessage is the resolver for the sendMessage field.
 func (r *mutationResolver) SendMessage(ctx context.Context, input model.SendMessageInput) (*model.Message, error) {
-	panic(fmt.Errorf("not implemented: SendMessage - sendMessage"))
+	chatService := service.NewChatService(ctx, r.DB)
+	return chatService.SendMessage(input)
 }
 
 // CreateConversation is the resolver for the createConversation field.
 func (r *mutationResolver) CreateConversation(ctx context.Context, input model.CreateConversationInput) (*model.Conversation, error) {
-	panic(fmt.Errorf("not implemented: CreateConversation - createConversation"))
-}
-
-// SubscribeToConversation is the resolver for the subscribeToConversation field.
-func (r *mutationResolver) SubscribeToConversation(ctx context.Context, input model.SubscribeToConversationInput) (*model.ConversationSubscription, error) {
-	panic(fmt.Errorf("not implemented: SubscribeToConversation - subscribeToConversation"))
-}
-
-// UnsubscribeFromConversation is the resolver for the unsubscribeFromConversation field.
-func (r *mutationResolver) UnsubscribeFromConversation(ctx context.Context, input model.UnsubscribeFromConversationInput) (*model.ConversationSubscription, error) {
-	panic(fmt.Errorf("not implemented: UnsubscribeFromConversation - unsubscribeFromConversation"))
+	chatService := service.NewChatService(ctx, r.DB)
+	return chatService.CreateConversation(input)
 }
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	userService := service.NewUserService(ctx, r.DB)
+	return userService.GetUser(id)
 }
 
 // Conversation is the resolver for the conversation field.
 func (r *queryResolver) Conversation(ctx context.Context, id string) (*model.Conversation, error) {
-	panic(fmt.Errorf("not implemented: Conversation - conversation"))
+	chatService := service.NewChatService(ctx, r.DB)
+	return chatService.GetConversation(id)
 }
 
 // Message is the resolver for the message field.
 func (r *queryResolver) Message(ctx context.Context, id string) (*model.Message, error) {
-	panic(fmt.Errorf("not implemented: Message - message"))
+	chatService := service.NewChatService(ctx, r.DB)
+	return chatService.GetMessage(id)
 }
 
 // NewMessage is the resolver for the newMessage field.
 func (r *subscriptionResolver) NewMessage(ctx context.Context, conversationID string) (<-chan *model.Message, error) {
-	panic(fmt.Errorf("not implemented: NewMessage - newMessage"))
-}
+	chatService := service.NewChatService(ctx, r.DB)
+	messageChan, doneChan, err := chatService.NewMessageSubscription(conversationID)
+	if err != nil {
+		return nil, err
+	}
 
-// Conversation returns graph.ConversationResolver implementation.
-func (r *Resolver) Conversation() graph.ConversationResolver { return &conversationResolver{r} }
+	go func() {
+		<-ctx.Done()
+		close(doneChan)
+	}()
 
-// ConversationSubscription returns graph.ConversationSubscriptionResolver implementation.
-func (r *Resolver) ConversationSubscription() graph.ConversationSubscriptionResolver {
-	return &conversationSubscriptionResolver{r}
+	return messageChan, nil
 }
 
 // Message returns graph.MessageResolver implementation.
@@ -91,7 +69,5 @@ func (r *Resolver) Message() graph.MessageResolver { return &messageResolver{r} 
 // Subscription returns graph.SubscriptionResolver implementation.
 func (r *Resolver) Subscription() graph.SubscriptionResolver { return &subscriptionResolver{r} }
 
-type conversationResolver struct{ *Resolver }
-type conversationSubscriptionResolver struct{ *Resolver }
 type messageResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }

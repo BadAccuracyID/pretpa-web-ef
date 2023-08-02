@@ -12,12 +12,6 @@ type Message {
     createdAt: String!
 }
 
-type ConversationSubscription {
-    id: ID!
-    user: User!
-    conversation: Conversation!
-}
-
 input SendMessageInput {
     userId: ID!
     conversationId: ID!
@@ -26,15 +20,6 @@ input SendMessageInput {
 
 input CreateConversationInput {
     userIds: [ID!]!
-}
-
-input SubscribeToConversationInput {
-    userId: ID!
-    conversationId: ID!
-}
-
-input UnsubscribeFromConversationInput {
-    subscriptionId: ID!
 }
 
 extend type Query {
@@ -46,8 +31,6 @@ extend type Query {
 extend type Mutation {
     sendMessage(input: SendMessageInput!): Message
     createConversation(input: CreateConversationInput!): Conversation
-    subscribeToConversation(input: SubscribeToConversationInput!): ConversationSubscription
-    unsubscribeFromConversation(input: UnsubscribeFromConversationInput!): ConversationSubscription
 }
 
 type Subscription {

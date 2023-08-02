@@ -38,8 +38,6 @@ type Config struct {
 }
 
 type ResolverRoot interface {
-	Conversation() ConversationResolver
-	ConversationSubscription() ConversationSubscriptionResolver
 	Message() MessageResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
@@ -56,12 +54,6 @@ type ComplexityRoot struct {
 		Users    func(childComplexity int) int
 	}
 
-	ConversationSubscription struct {
-		Conversation func(childComplexity int) int
-		ID           func(childComplexity int) int
-		User         func(childComplexity int) int
-	}
-
 	Message struct {
 		Content      func(childComplexity int) int
 		Conversation func(childComplexity int) int
@@ -71,16 +63,14 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		ChangePassword              func(childComplexity int, oldPassword string, newPassword string) int
-		CreateConversation          func(childComplexity int, input model.CreateConversationInput) int
-		DeleteCurrentUser           func(childComplexity int) int
-		DeleteUser                  func(childComplexity int, id string) int
-		Register                    func(childComplexity int, input model.RegisterInput) int
-		SendMessage                 func(childComplexity int, input model.SendMessageInput) int
-		SubscribeToConversation     func(childComplexity int, input model.SubscribeToConversationInput) int
-		UnsubscribeFromConversation func(childComplexity int, input model.UnsubscribeFromConversationInput) int
-		UpdateCurrentUser           func(childComplexity int, input model.UserInput) int
-		UpdateUser                  func(childComplexity int, id string, input model.UserInput) int
+		ChangePassword     func(childComplexity int, oldPassword string, newPassword string) int
+		CreateConversation func(childComplexity int, input model.CreateConversationInput) int
+		DeleteCurrentUser  func(childComplexity int) int
+		DeleteUser         func(childComplexity int, id string) int
+		Register           func(childComplexity int, input model.RegisterInput) int
+		SendMessage        func(childComplexity int, input model.SendMessageInput) int
+		UpdateCurrentUser  func(childComplexity int, input model.UserInput) int
+		UpdateUser         func(childComplexity int, id string, input model.UserInput) int
 	}
 
 	Query struct {
@@ -106,15 +96,7 @@ type ComplexityRoot struct {
 	}
 }
 
-type ConversationResolver interface {
-	ID(ctx context.Context, obj *model.Conversation) (string, error)
-}
-type ConversationSubscriptionResolver interface {
-	ID(ctx context.Context, obj *model.ConversationSubscription) (string, error)
-}
 type MessageResolver interface {
-	ID(ctx context.Context, obj *model.Message) (string, error)
-
 	CreatedAt(ctx context.Context, obj *model.Message) (string, error)
 }
 type MutationResolver interface {
@@ -126,8 +108,6 @@ type MutationResolver interface {
 	ChangePassword(ctx context.Context, oldPassword string, newPassword string) (*model.User, error)
 	SendMessage(ctx context.Context, input model.SendMessageInput) (*model.Message, error)
 	CreateConversation(ctx context.Context, input model.CreateConversationInput) (*model.Conversation, error)
-	SubscribeToConversation(ctx context.Context, input model.SubscribeToConversationInput) (*model.ConversationSubscription, error)
-	UnsubscribeFromConversation(ctx context.Context, input model.UnsubscribeFromConversationInput) (*model.ConversationSubscription, error)
 }
 type QueryResolver interface {
 	GetCurrentUser(ctx context.Context) (*model.User, error)
@@ -177,27 +157,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Conversation.Users(childComplexity), true
-
-	case "ConversationSubscription.conversation":
-		if e.complexity.ConversationSubscription.Conversation == nil {
-			break
-		}
-
-		return e.complexity.ConversationSubscription.Conversation(childComplexity), true
-
-	case "ConversationSubscription.id":
-		if e.complexity.ConversationSubscription.ID == nil {
-			break
-		}
-
-		return e.complexity.ConversationSubscription.ID(childComplexity), true
-
-	case "ConversationSubscription.user":
-		if e.complexity.ConversationSubscription.User == nil {
-			break
-		}
-
-		return e.complexity.ConversationSubscription.User(childComplexity), true
 
 	case "Message.content":
 		if e.complexity.Message.Content == nil {
@@ -300,30 +259,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SendMessage(childComplexity, args["input"].(model.SendMessageInput)), true
-
-	case "Mutation.subscribeToConversation":
-		if e.complexity.Mutation.SubscribeToConversation == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_subscribeToConversation_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.SubscribeToConversation(childComplexity, args["input"].(model.SubscribeToConversationInput)), true
-
-	case "Mutation.unsubscribeFromConversation":
-		if e.complexity.Mutation.UnsubscribeFromConversation == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_unsubscribeFromConversation_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UnsubscribeFromConversation(childComplexity, args["input"].(model.UnsubscribeFromConversationInput)), true
 
 	case "Mutation.updateCurrentUser":
 		if e.complexity.Mutation.UpdateCurrentUser == nil {
@@ -482,8 +417,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputLoginInput,
 		ec.unmarshalInputRegisterInput,
 		ec.unmarshalInputSendMessageInput,
-		ec.unmarshalInputSubscribeToConversationInput,
-		ec.unmarshalInputUnsubscribeFromConversationInput,
 		ec.unmarshalInputUserInput,
 	)
 	first := true
@@ -704,36 +637,6 @@ func (ec *executionContext) field_Mutation_sendMessage_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_subscribeToConversation_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.SubscribeToConversationInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNSubscribeToConversationInput2githubᚗcomᚋbadaccuracyidᚋtpaᚑwebᚑefᚋinternalᚋgraphᚋmodelᚐSubscribeToConversationInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_unsubscribeFromConversation_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.UnsubscribeFromConversationInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUnsubscribeFromConversationInput2githubᚗcomᚋbadaccuracyidᚋtpaᚑwebᚑefᚋinternalᚋgraphᚋmodelᚐUnsubscribeFromConversationInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_updateCurrentUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -930,7 +833,7 @@ func (ec *executionContext) _Conversation_id(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Conversation().ID(rctx, obj)
+		return obj.ID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -951,8 +854,8 @@ func (ec *executionContext) fieldContext_Conversation_id(ctx context.Context, fi
 	fc = &graphql.FieldContext{
 		Object:     "Conversation",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
 		},
@@ -1072,158 +975,6 @@ func (ec *executionContext) fieldContext_Conversation_messages(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _ConversationSubscription_id(ctx context.Context, field graphql.CollectedField, obj *model.ConversationSubscription) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ConversationSubscription_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ConversationSubscription().ID(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ConversationSubscription_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ConversationSubscription",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ConversationSubscription_user(ctx context.Context, field graphql.CollectedField, obj *model.ConversationSubscription) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ConversationSubscription_user(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.User, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.User)
-	fc.Result = res
-	return ec.marshalNUser2githubᚗcomᚋbadaccuracyidᚋtpaᚑwebᚑefᚋinternalᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ConversationSubscription_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ConversationSubscription",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "name":
-				return ec.fieldContext_User_name(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "username":
-				return ec.fieldContext_User_username(ctx, field)
-			case "jwtToken":
-				return ec.fieldContext_User_jwtToken(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ConversationSubscription_conversation(ctx context.Context, field graphql.CollectedField, obj *model.ConversationSubscription) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ConversationSubscription_conversation(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Conversation, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.Conversation)
-	fc.Result = res
-	return ec.marshalNConversation2githubᚗcomᚋbadaccuracyidᚋtpaᚑwebᚑefᚋinternalᚋgraphᚋmodelᚐConversation(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ConversationSubscription_conversation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ConversationSubscription",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Conversation_id(ctx, field)
-			case "users":
-				return ec.fieldContext_Conversation_users(ctx, field)
-			case "messages":
-				return ec.fieldContext_Conversation_messages(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Conversation", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Message_id(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Message_id(ctx, field)
 	if err != nil {
@@ -1238,7 +989,7 @@ func (ec *executionContext) _Message_id(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Message().ID(rctx, obj)
+		return obj.ID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1259,8 +1010,8 @@ func (ec *executionContext) fieldContext_Message_id(ctx context.Context, field g
 	fc = &graphql.FieldContext{
 		Object:     "Message",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
 		},
@@ -1967,126 +1718,6 @@ func (ec *executionContext) fieldContext_Mutation_createConversation(ctx context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_createConversation_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_subscribeToConversation(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_subscribeToConversation(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SubscribeToConversation(rctx, fc.Args["input"].(model.SubscribeToConversationInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.ConversationSubscription)
-	fc.Result = res
-	return ec.marshalOConversationSubscription2ᚖgithubᚗcomᚋbadaccuracyidᚋtpaᚑwebᚑefᚋinternalᚋgraphᚋmodelᚐConversationSubscription(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_subscribeToConversation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_ConversationSubscription_id(ctx, field)
-			case "user":
-				return ec.fieldContext_ConversationSubscription_user(ctx, field)
-			case "conversation":
-				return ec.fieldContext_ConversationSubscription_conversation(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ConversationSubscription", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_subscribeToConversation_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_unsubscribeFromConversation(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_unsubscribeFromConversation(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UnsubscribeFromConversation(rctx, fc.Args["input"].(model.UnsubscribeFromConversationInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.ConversationSubscription)
-	fc.Result = res
-	return ec.marshalOConversationSubscription2ᚖgithubᚗcomᚋbadaccuracyidᚋtpaᚑwebᚑefᚋinternalᚋgraphᚋmodelᚐConversationSubscription(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_unsubscribeFromConversation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_ConversationSubscription_id(ctx, field)
-			case "user":
-				return ec.fieldContext_ConversationSubscription_user(ctx, field)
-			case "conversation":
-				return ec.fieldContext_ConversationSubscription_conversation(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ConversationSubscription", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_unsubscribeFromConversation_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4891,73 +4522,6 @@ func (ec *executionContext) unmarshalInputSendMessageInput(ctx context.Context, 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSubscribeToConversationInput(ctx context.Context, obj interface{}) (model.SubscribeToConversationInput, error) {
-	var it model.SubscribeToConversationInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"userId", "conversationId"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "userId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
-		case "conversationId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("conversationId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ConversationID = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputUnsubscribeFromConversationInput(ctx context.Context, obj interface{}) (model.UnsubscribeFromConversationInput, error) {
-	var it model.UnsubscribeFromConversationInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"subscriptionId"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "subscriptionId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subscriptionId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.SubscriptionID = data
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj interface{}) (model.UserInput, error) {
 	var it model.UserInput
 	asMap := map[string]interface{}{}
@@ -5025,130 +4589,19 @@ func (ec *executionContext) _Conversation(ctx context.Context, sel ast.Selection
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Conversation")
 		case "id":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Conversation_id(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Conversation_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
 			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "users":
 			out.Values[i] = ec._Conversation_users(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "messages":
 			out.Values[i] = ec._Conversation_messages(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var conversationSubscriptionImplementors = []string{"ConversationSubscription"}
-
-func (ec *executionContext) _ConversationSubscription(ctx context.Context, sel ast.SelectionSet, obj *model.ConversationSubscription) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, conversationSubscriptionImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("ConversationSubscription")
-		case "id":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._ConversationSubscription_id(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "user":
-			out.Values[i] = ec._ConversationSubscription_user(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "conversation":
-			out.Values[i] = ec._ConversationSubscription_conversation(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -5185,41 +4638,10 @@ func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, 
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Message")
 		case "id":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Message_id(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Message_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
 			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "user":
 			out.Values[i] = ec._Message_user(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -5356,14 +4778,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "createConversation":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createConversation(ctx, field)
-			})
-		case "subscribeToConversation":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_subscribeToConversation(ctx, field)
-			})
-		case "unsubscribeFromConversation":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_unsubscribeFromConversation(ctx, field)
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -6121,16 +5535,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNSubscribeToConversationInput2githubᚗcomᚋbadaccuracyidᚋtpaᚑwebᚑefᚋinternalᚋgraphᚋmodelᚐSubscribeToConversationInput(ctx context.Context, v interface{}) (model.SubscribeToConversationInput, error) {
-	res, err := ec.unmarshalInputSubscribeToConversationInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNUnsubscribeFromConversationInput2githubᚗcomᚋbadaccuracyidᚋtpaᚑwebᚑefᚋinternalᚋgraphᚋmodelᚐUnsubscribeFromConversationInput(ctx context.Context, v interface{}) (model.UnsubscribeFromConversationInput, error) {
-	res, err := ec.unmarshalInputUnsubscribeFromConversationInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) marshalNUser2githubᚗcomᚋbadaccuracyidᚋtpaᚑwebᚑefᚋinternalᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
@@ -6516,13 +5920,6 @@ func (ec *executionContext) marshalOConversation2ᚖgithubᚗcomᚋbadaccuracyid
 		return graphql.Null
 	}
 	return ec._Conversation(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOConversationSubscription2ᚖgithubᚗcomᚋbadaccuracyidᚋtpaᚑwebᚑefᚋinternalᚋgraphᚋmodelᚐConversationSubscription(ctx context.Context, sel ast.SelectionSet, v *model.ConversationSubscription) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._ConversationSubscription(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOMessage2githubᚗcomᚋbadaccuracyidᚋtpaᚑwebᚑefᚋinternalᚋgraphᚋmodelᚐMessage(ctx context.Context, sel ast.SelectionSet, v model.Message) graphql.Marshaler {

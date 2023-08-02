@@ -24,15 +24,6 @@ type SendMessageInput struct {
 	Content        string `json:"content"`
 }
 
-type SubscribeToConversationInput struct {
-	UserID         string `json:"userId"`
-	ConversationID string `json:"conversationId"`
-}
-
-type UnsubscribeFromConversationInput struct {
-	SubscriptionID string `json:"subscriptionId"`
-}
-
 type UserInput struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
