@@ -1,6 +1,6 @@
 package model
 
-import "github.com/badaccuracyid/tpa-web-ef/internal/utils"
+import "github.com/badaccuracyid/pretpa-web-ef/internal/utils"
 
 type User struct {
 	ID string `json:"user_id" gorm:"primaryKey"`

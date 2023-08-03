@@ -2,11 +2,11 @@ package main
 
 import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/badaccuracyid/tpa-web-ef/internal/graph"
-	"github.com/badaccuracyid/tpa-web-ef/internal/graph/resolver"
-	"github.com/badaccuracyid/tpa-web-ef/internal/middleware"
-	"github.com/badaccuracyid/tpa-web-ef/internal/service"
-	"github.com/badaccuracyid/tpa-web-ef/pkg/database"
+	"github.com/badaccuracyid/pretpa-web-ef/internal/graph"
+	"github.com/badaccuracyid/pretpa-web-ef/internal/graph/resolver"
+	"github.com/badaccuracyid/pretpa-web-ef/internal/middleware"
+	"github.com/badaccuracyid/pretpa-web-ef/internal/service"
+	"github.com/badaccuracyid/pretpa-web-ef/pkg/database"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"

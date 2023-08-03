@@ -7,8 +7,8 @@ package resolver
 import (
 	"context"
 
-	"github.com/badaccuracyid/tpa-web-ef/internal/graph/model"
-	"github.com/badaccuracyid/tpa-web-ef/internal/service"
+	"github.com/badaccuracyid/pretpa-web-ef/internal/graph/model"
+	"github.com/badaccuracyid/pretpa-web-ef/internal/service"
 )
 
 // Register is the resolver for the register field.

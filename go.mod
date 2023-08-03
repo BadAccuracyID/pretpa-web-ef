@@ -1,4 +1,4 @@
-module github.com/badaccuracyid/tpa-web-ef
+module github.com/badaccuracyid/pretpa-web-ef
 
 go 1.20
 

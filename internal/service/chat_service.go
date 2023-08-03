@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/badaccuracyid/tpa-web-ef/internal/graph/model"
+	"github.com/badaccuracyid/pretpa-web-ef/internal/graph/model"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"sync"

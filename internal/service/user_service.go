@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"errors"
-	"github.com/badaccuracyid/tpa-web-ef/internal/graph/model"
-	"github.com/badaccuracyid/tpa-web-ef/internal/utils"
+	"github.com/badaccuracyid/pretpa-web-ef/internal/graph/model"
+	"github.com/badaccuracyid/pretpa-web-ef/internal/utils"
 	"gorm.io/gorm"
 )
 

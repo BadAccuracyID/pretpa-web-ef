@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"context"
-	"github.com/badaccuracyid/tpa-web-ef/internal/service"
-	"github.com/badaccuracyid/tpa-web-ef/internal/utils"
+	"github.com/badaccuracyid/pretpa-web-ef/internal/service"
+	"github.com/badaccuracyid/pretpa-web-ef/internal/utils"
 	"net/http"
 )
 
